@@ -1,0 +1,28 @@
+# Workspace content on the PC (never commit)
+/mods/
+/cache/
+/work/
+/data/
+
+# Real configuration and secrets
+/config/*.toml
+!/config/*.example.toml
+!/config/mods.toml
+secrets.toml
+*.secrets.toml
+sentinel/sentinel.conf
+
+# Builds
+sentinel/cs2mmt-sentinel
+sentinel/tests/test_sentinel
+harness/**/bin/
+harness/**/obj/
+*.user
+.vs/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/

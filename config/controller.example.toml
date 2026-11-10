@@ -1,0 +1,112 @@
+# Controller (always-on: Synology NAS and/or Debian/Ubuntu server).
+# Copy to controller.toml; put the secrets in secrets.toml next to it (see secrets.example.toml).
+# Run one controller per machine; give each its own id. The two can back each other up.
+
+[controller]
+id = "nas"                      # unique per machine: "nas", "server", ...
+role = "primary"                # primary: speaks (notifications, Discord). secondary: on standby
+listen_host = "0.0.0.0"
+listen_port = 8765
+data_dir = "/data"              # SQLite state and logs (a Docker volume, or a folder)
+mods_file = "/app/config/mods.toml"   # the repository's registry: a new mod arrives with !update_tool
+prompts_dir = "/app/prompts"
+unattended = true               # the owner is away: the PC may be powered off after unasked boots
+log_level = "INFO"
+
+# The other controller(s). Each checks the others and reports one that stops answering.
+[update]                        # Discord !update_tool: git pull this checkout (fast-forward only), check, restart
+branch = "main"
+restart = true
+sentinel_url = "http://127.0.0.1:8766"   # the C sentinel on this machine is restarted (rebuilt) too
+
+[[peers]]
+id = "server"
+url = "http://192.168.0.20:8765"
+role = "secondary"
+
+[redundancy]
+failover_after_minutes = 10     # secondary takes over notifications after the primary is gone this long
+alert_after_minutes = 15        # report a silent peer after this long
+
+# The PC to wake. The broadcast address of the LAN works best (also from Docker with host networking).
+[[hosts]]
+id = "main-pc"
+mac = "AA:BB:CC:DD:EE:FF"
+broadcast = "192.168.0.255"
+port = 9
+
+[steam]
+appid = 949230
+branch = "public"
+sources = ["steamcmd_api", "steamcmd"]   # api.steamcmd.net first, SteamCMD as a fallback if installed
+steamcmd_path = ""                      # e.g. /usr/games/steamcmd
+poll_minutes = 15
+settle_minutes = 30                     # wait this long after a new build appears (hotfixes)
+watch_branches = []                     # e.g. ["beta"]: heads-up only
+
+[forum]
+enabled = true
+poll_minutes = 60
+ignore_authors = ["Boing787"]
+
+[github]
+enabled = true
+poll_minutes = 30
+ignore_authors = ["kanghyeon01"]
+
+[triage]
+run_on = "agent"                # "controller" if Claude Code is installed here (saves waking the PC)
+min_confidence = 0.6
+auto_fix = true                 # start a fix attempt for clear bug reports (publishing still needs approval)
+bugfix_min_interval_hours = 24  # at most one fix attempt per mod per day
+
+[claude]                        # only used when triage.run_on = "controller"
+executable = "claude"
+triage_model = "sonnet"
+
+[dispatch]
+claim_timeout_minutes = 25      # time for the PC to boot, switch OS, log in and claim the job
+max_wake_attempts = 3
+max_job_attempts = 3
+retry_after_minutes = 30
+lease_minutes = 20              # a running job must report at least this often
+transient_retry_hours = 6       # Steam download or Claude usage limit: try again after this
+power_cycle_command = ""        # e.g. a smart plug: "curl -s http://192.168.0.50/relay/0?turn=off" (see docs)
+
+# What happens to a finished change: "auto" publishes at once, "veto:12" publishes after 12 hours
+# unless the owner rejects it, "require" waits for an explicit approval.
+[approval]
+game_update = "auto"
+bugfix = "require"
+expire_days = 14
+
+[schedule]
+utc_offset_hours = 9            # Korea
+rehearsal_day = 1               # monthly full rehearsal (no publishing) on this day; 0 = off
+rehearsal_hour = 11
+weekly_report_weekday = 6       # 0 = Monday ... 6 = Sunday; -1 = off
+weekly_report_hour = 19         # after duty hours
+
+[health]
+healthcheck_url = ""            # heartbeat URL of a monitoring service you choose; it alerts you when pings stop
+healthcheck_fail_url = ""       # optional: fetched instead while Steam checks keep failing (empty = just stop pinging)
+ping_minutes = 5
+watchdog_minutes = 10           # the process restarts itself if its main loop stops this long
+
+[notify]
+# Discord bot in your private server (docs/SETUP.md, step "Discord"). The bot token is in secrets.toml.
+discord_channel_id = ""         # the channel for messages and commands (Developer Mode → right-click → Copy Channel ID)
+discord_owner_user_id = ""      # your own user ID: only your commands and ✅/❌ reactions count
+discord_poll_seconds = 10
+label = ""                      # optional prefix, e.g. "NAS"
+
+# Credentials that expire: you get a message 60, 30, 14, 7, 3 and 1 days before.
+[[reminders]]
+name = "Claude 토큰 (claude setup-token)"
+expires = "2027-11-01"
+how = "PC에서 claude setup-token 실행 후 agent의 secrets.toml claude_oauth_token 교체"
+
+[[reminders]]
+name = "GitHub 토큰"
+expires = "2027-11-01"
+how = "GitHub Settings > Developer settings에서 새 토큰 발급 후 secrets.toml 교체"

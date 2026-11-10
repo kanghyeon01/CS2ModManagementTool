@@ -1,0 +1,18 @@
+# Linux side of the multi-boot PC: at boot, ask the controllers whether this boot is for a job
+# and, if so, reboot into Windows once (efibootmgr BootNext by default).
+[Unit]
+Description=CS2 Mod Management Tool: switch to Windows for a queued job
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# Pull the latest tool version first (a failure, e.g. no network yet, is ignored).
+ExecStartPre=-/usr/bin/git -C /opt/cs2mmt pull --ff-only -q
+ExecStart=/usr/bin/python3 -m cs2mmt agent linux-switch --config /etc/cs2mmt/agent-linux.toml
+WorkingDirectory=/opt/cs2mmt
+TimeoutStartSec=900
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

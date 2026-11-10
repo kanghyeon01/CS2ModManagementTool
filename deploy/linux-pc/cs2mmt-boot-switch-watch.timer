@@ -1,0 +1,9 @@
+[Unit]
+Description=Check every 10 minutes for a CS2 Mod Management Tool job (PC left on in Linux)
+
+[Timer]
+OnBootSec=15min
+OnUnitActiveSec=10min
+
+[Install]
+WantedBy=timers.target

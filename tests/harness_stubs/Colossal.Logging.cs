@@ -1,0 +1,1 @@
+namespace Colossal.Logging { public interface ILog { void Info(object message); void Error(object message); ILog SetShowsErrorsInUI(bool value); } public static class LogManager { public static ILog GetLogger(string name) => null; } }

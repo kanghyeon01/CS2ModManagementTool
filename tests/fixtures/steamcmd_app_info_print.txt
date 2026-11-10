@@ -1,0 +1,47 @@
+Redirecting stderr to '/root/Steam/logs/stderr.txt'
+[  0%] Checking for available updates...
+[----] Verifying installation...
+Steam Console Client (c) Valve Corporation - version 1761000000
+-- type 'quit' to exit --
+Loading Steam API...OK
+Connecting anonymously to Steam Public...OK
+Waiting for client config...OK
+Waiting for user info...OK
+AppID : 949230, change number : 31234567/0, last change : Fri Oct 31 10:00:00 2026
+"949230"
+{
+	"common"
+	{
+		"name"		"Cities: Skylines II"
+		"type"		"Game"
+	}
+	"depots"
+	{
+		"949231"
+		{
+			"name"		"Cities: Skylines II Content"
+			"manifests"
+			{
+				"public"
+				{
+					"gid"		"1234567890123456789"
+				}
+			}
+		}
+		"branches"
+		{
+			"public"
+			{
+				"buildid"		"20512345"
+				"timeupdated"		"1761900000"
+			}
+			"previous"
+			{
+				"buildid"		"20400001"
+				"description"		"Previous version"
+				"pwdrequired"		"0"
+				"timeupdated"		"1760000000"
+			}
+		}
+	}
+}

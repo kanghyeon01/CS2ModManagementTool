@@ -1,0 +1,27 @@
+# Linux side of the PC (the boot switch). Copy to /etc/cs2mmt/agent-linux.toml, chmod 600.
+
+[[controllers]]
+id = "nas"
+url = "http://192.168.0.10:8765"
+
+[[controllers]]
+id = "nas-sentinel"
+url = "http://192.168.0.10:8766"
+
+[[controllers]]
+id = "server"
+url = "http://192.168.0.20:8765"
+
+[[controllers]]
+id = "server-sentinel"
+url = "http://192.168.0.20:8766"
+
+[linux]
+method = "auto"                     # auto (efibootmgr if UEFI has Windows Boot Manager, else grub-reboot) | efibootmgr | grub-reboot | grub2-reboot | systemd-boot
+target = "Windows Boot Manager"     # efibootmgr: regex on the entry label; grub: the menu entry title
+grace_seconds = 60                  # logged-in users get a message and this long to cancel
+network_wait_seconds = 300
+idle_shutdown_minutes = 0           # >0: power off an unasked boot (power restored) when nobody logs in
+
+[secrets]
+api_token = "the same token as the controllers"

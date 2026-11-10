@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Test harness for the CS2 Mod Management Tool's in-game smoke test. Never published.
+    Built the same way as the owner's mods (directly against the game's managed assemblies,
+    no Burst, no toolchain), deployed to the local Mods folder only while a test runs.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <AssemblyName>CS2MMTHarness</AssemblyName>
+    <RootNamespace>CS2MMTHarness</RootNamespace>
+    <Version>0.1.0</Version>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <NoStdLib>true</NoStdLib>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <CS2ManagedPath Condition="'$(CS2ManagedPath)' == '' and '$(CSII_MANAGEDPATH)' != ''">$(CSII_MANAGEDPATH)</CS2ManagedPath>
+    <CS2ManagedPath Condition="'$(CS2ManagedPath)' == ''">$(MSBuildProgramFiles32)\Steam\steamapps\common\Cities Skylines II\Cities2_Data\Managed</CS2ManagedPath>
+    <CS2LocalModsPath Condition="'$(CS2LocalModsPath)' == ''">$(USERPROFILE)\AppData\LocalLow\Colossal Order\Cities Skylines II\Mods</CS2LocalModsPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <GameReference Include="mscorlib;netstandard;System;System.Core" />
+    <GameReference Include="Game" />
+    <GameReference Include="Colossal.Core;Colossal.Collections;Colossal.IO.AssetDatabase;Colossal.Localization;Colossal.Logging;Colossal.Mathematics;Colossal.UI.Binding" />
+    <GameReference Include="Unity.Burst;Unity.Collections;Unity.Entities;Unity.Mathematics;UnityEngine.CoreModule" />
+    <Reference Include="@(GameReference)">
+      <HintPath>$(CS2ManagedPath)\%(Identity).dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="CheckGamePath" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(CS2ManagedPath)\Game.dll')" Text="Cities: Skylines II not found at '$(CS2ManagedPath)'. Build with -p:CS2ManagedPath=&lt;game folder&gt;\Cities2_Data\Managed." />
+  </Target>
+
+  <Target Name="DeployToLocalMods" AfterTargets="Build">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(CS2LocalModsPath)\$(AssemblyName)" SkipUnchangedFiles="false" />
+    <Message Importance="high" Text="Deployed $(TargetFileName) -> $(CS2LocalModsPath)\$(AssemblyName)" />
+  </Target>
+
+</Project>

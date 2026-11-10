@@ -1,0 +1,11 @@
+# Optional: when the PC is left running Linux, switch to Windows for a job if nobody is using it.
+[Unit]
+Description=CS2 Mod Management Tool: switch to Windows when a job waits and the PC is idle
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -m cs2mmt agent linux-switch --watch --config /etc/cs2mmt/agent-linux.toml
+WorkingDirectory=/opt/cs2mmt
+TimeoutStartSec=300

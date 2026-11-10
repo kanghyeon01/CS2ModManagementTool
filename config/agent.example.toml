@@ -1,0 +1,102 @@
+# PC agent on Windows. Copy to agent.toml (in this repository's config folder).
+# Secrets do NOT go here: keep them in %LOCALAPPDATA%\cs2mmt\secrets.toml, outside the workspace,
+# where Claude's sessions cannot read them (see agent-secrets.example.toml).
+secrets_file = "%LOCALAPPDATA%/cs2mmt/secrets.toml"
+
+[agent]
+host_id = "main-pc"                 # the same id as [[hosts]] in the controllers
+workspace = ".."                    # this repository's checkout (relative to this file)
+mods_file = "mods.toml"
+mods_root = "mods"
+work_dir = "../work"                # job folders and logs
+cache_dir = "../cache"              # game DLL copies and decompiled code: local only, never pushed
+after_job = "shutdown"              # shutdown | reboot_linux | stay
+shutdown_delay_s = 120              # cancel with: shutdown /a
+linux_entry_pattern = "ubuntu|debian|fedora|linux"   # for after_job = "reboot_linux"
+network_wait_seconds = 300
+watch_after_manual_boot = false     # true: also take jobs while the PC is on and idle
+only_when_idle_minutes = 15
+poll_minutes = 5
+min_free_gb = 10
+
+[update]
+auto = true                         # pull the latest tool version every time the agent starts (rolls back if it breaks)
+branch = "main"
+
+[[controllers]]
+id = "nas"
+url = "http://192.168.0.10:8765"
+
+[[controllers]]
+id = "nas-sentinel"                 # the C sentinel on the NAS
+url = "http://192.168.0.10:8766"
+
+[[controllers]]
+id = "server"
+url = "http://192.168.0.20:8765"
+
+[[controllers]]
+id = "server-sentinel"
+url = "http://192.168.0.20:8766"
+
+[game]
+appid = 949230
+install_dir = ""                    # empty = found through Steam
+user_data_dir = "%USERPROFILE%/AppData/LocalLow/Colossal Order/Cities Skylines II"
+# Starting Cities2.exe directly skips the Paradox launcher; Steam must be running and logged in.
+launch = ["{game_dir}/Cities2.exe", "-continuelastsave"]
+launch_env = { SteamAppId = "949230", SteamGameId = "949230", SteamOverlayGameId = "949230" }
+test_save = "CS2MMT-Test"           # the harness loads a save with this in its name if the game stays in the menu
+smoke_minutes = 6
+load_timeout_minutes = 12
+sim_speed = 3
+require_city_load = true            # a test that never reached a city counts as failed
+process_name = "Cities2.exe"
+ignore_log_patterns = []            # regexes for known harmless error lines
+
+[steam]
+exe = ""                            # empty = found in the registry
+start_args = ["-silent"]
+update_timeout_minutes = 120
+
+[build]
+dotnet = "dotnet"
+configuration = "Release"
+timeout_minutes = 15
+
+[decompile]
+enabled = true
+ilspycmd = "ilspycmd"               # dotnet tool install -g ilspycmd
+assemblies = ["Game", "Colossal.Core", "Colossal.Collections", "Colossal.IO.AssetDatabase", "Colossal.Localization", "Colossal.Logging", "Colossal.Mathematics", "Colossal.UI.Binding", "Colossal.UI"]
+timeout_minutes = 30
+keep_builds = 3
+
+[claude]
+executable = "claude"
+model = "opus"
+fallback_model = "sonnet"
+ping_model = "haiku"
+effort = "high"
+max_turns = 150
+fix_timeout_minutes = 90
+compile_rounds = 2
+smoke_rounds = 1
+max_budget_usd = 0                  # 0 = no cap (with a subscription the figure is only an estimate)
+session_mode = "fresh"              # fresh (recommended) | resume (one long session per mod)
+
+[publish]
+modpublisher = ""                   # empty = %CSII_MODPUBLISHERPATH% or the game's ~Tooling~ folder
+timeout_minutes = 20
+verbose = true
+
+[git]
+author_name = "Boing787 (CS2MMT)"
+author_email = ""                   # your GitHub e-mail or the noreply address
+push = true
+branch_prefix = "cs2mmt/"
+co_author = "Claude <noreply@anthropic.com>"
+
+[policy]
+max_files = 25
+max_changed_lines = 1500            # game-update fixes
+bugfix_max_changed_lines = 400

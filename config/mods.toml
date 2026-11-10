@@ -1,0 +1,96 @@
+# Mods looked after by the CS2 Mod Management Tool.
+#
+# Adding a mod = adding one [[mod]] table (no code change). Paths are relative to the
+# workspace (this repository's checkout on the PC). Keys left out come from [defaults].
+#
+#   id               short name, also used for branch names (letters, digits, . _ -)
+#   repo             GitHub URL (cloned into `dir` when missing)
+#   project          the .csproj inside the mod folder
+#   assembly         the DLL name; also the local Mods/<assembly> folder that gets uploaded
+#   depends_on       mods this one compiles against (built first)
+#   release_with     mods that must be released together when one changes
+#   forum_threads    Paradox forum threads to watch for reports
+#   identifiers      strings that mark a log line or stack trace as this mod's (namespace + ".")
+#   log_names        the mod's own log file names under Logs/ (default: assembly)
+#   smoke_expect     regexes that must appear in the mod's log during the in-game test
+#   version_files    other files carrying the version (besides PublishConfiguration ModVersion)
+#   readme_game_version  the README line naming the game version it was tested on
+#   publish          false = build and test, but never upload
+#   notes            context for Claude (design rules, public APIs)
+
+[defaults]
+default_branch = "main"
+github_issues = true
+owner_names = ["Boing787", "kanghyeon01"]
+
+[[mod]]
+id = "RealisticAviation"
+display_name = "Realistic Aviation"
+repo = "https://github.com/kanghyeon01/RealisticAviation"
+dir = "mods/RealisticAviation"
+project = "RealisticAviation.csproj"
+assembly = "RealisticAviation"
+forum_threads = ["https://forum.paradoxplaza.com/forum/threads/realistic-aviation-forum.1946341/"]
+identifiers = ["RealisticAviation.", "ui-mods/RealisticAviation.mjs"]
+log_names = ["RealisticAviation"]
+smoke_expect = [
+    'Game \S+, Realistic Aviation',
+    # With airports in the test city, the tower logs each airport's airspace once it starts.
+    # Uncomment when the test save has at least one airport:
+    # 'Airspace of airport',
+]
+version_files = [
+    { path = "UI/RealisticAviation.mjs", pattern = '^ \* Version: (?P<v>[0-9.]+)\s*$' },
+]
+readme_game_version = { path = "README.md", pattern = 'Built and tested on game version \*\*(?P<v>[^*]+)\*\*' }
+notes = """
+Public add-on API: the `Api` class, documented in docs/AddonGuide.md, promises add-only changes
+(never remove or change a public member; Aviation Weather Add-on and others use it).
+docs/PLAN.md records the owner's design decisions and known issues; behaviour described there as
+intended is not a bug. The tower (AtcSystem) runs as a job right after AircraftNavigationSystem;
+never touch lane flags or lane buffers (PLAN.md explains why). Saved settings carry a format
+version byte (SaveFormat); keep old saves loading. Locale text exists in English and Korean
+(Locale.cs): add both when adding text.
+"""
+
+[[mod]]
+id = "AviationWeatherAddon"
+display_name = "Aviation Weather Add-on"
+repo = "https://github.com/kanghyeon01/AviationWeatherAddon"
+dir = "mods/AviationWeatherAddon"
+project = "RealisticAviationATIS.csproj"
+assembly = "RealisticAviationATIS"
+depends_on = ["RealisticAviation"]
+identifiers = ["RealisticAviationATIS", "ui-mods/RealisticAviationATIS.mjs"]
+log_names = ["RealisticAviationATIS"]
+smoke_expect = ['Game \S+, Aviation Weather Add-on']
+version_files = [
+    { path = "UI/RealisticAviationATIS.mjs", pattern = '^ \* Version: (?P<v>[0-9.]+)\s*$' },
+]
+notes = """
+An add-on for Realistic Aviation that uses only RealisticAviation.Api (compiled against the RA DLL
+in the local Mods folder, so RA is built first). METAR/ATIS text follows real phraseology; the
+README describes the rules. Locale text in English and Korean.
+"""
+
+[[mod]]
+id = "NoJaywalking"
+display_name = "No Jaywalking"
+repo = "https://github.com/kanghyeon01/NoJaywalking"
+dir = "mods/NoJaywalking"
+project = "NoJaywalking.csproj"
+assembly = "NoJaywalking"
+identifiers = ["NoJaywalking.", "ui-mods/NoJaywalking.mjs"]
+log_names = ["NoJaywalking"]
+smoke_expect = ["OnLoad"]
+version_files = [
+    { path = "UI/NoJaywalking.mjs", pattern = '^ \* Version: (?P<v>[0-9.]+)\s*$' },
+    { path = "NoJaywalking.csproj", pattern = '<Version>(?P<v>[0-9.]+)</Version>' },
+]
+readme_game_version = { path = "README.md", pattern = 'Built and tested on game version \*\*(?P<v>[^*]+)\*\*' }
+notes = """
+Changes only pedestrian pathfinding at nodes the player marks; lanes, geometry and traffic lights
+stay vanilla (README "How it works"). CrossingRestrictionSystem must run right after
+LanesModifiedSystem. Not on Paradox Mods yet (empty ModId): the tool builds and tests it but the
+first upload is the owner's.
+"""

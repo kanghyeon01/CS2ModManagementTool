@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cs2mmt"
+version = "0.1.0"
+description = "Keeps Cities: Skylines II code mods working across game updates, unattended."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []  # standard library only, on purpose
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+cs2mmt = "cs2mmt.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["cs2mmt*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

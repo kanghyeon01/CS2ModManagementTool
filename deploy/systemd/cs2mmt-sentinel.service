@@ -1,0 +1,29 @@
+# Debian/Ubuntu without Docker:
+#   sudo apt install build-essential curl
+#   (the repository /opt/cs2mmt is owned by the cs2mmt user; the unit rebuilds the binary from it at every start)
+#   sudo install -o cs2mmt -m 600 sentinel.conf /etc/cs2mmt/sentinel.conf   (state_file under /var/lib/cs2mmt)
+#   sudo cp deploy/systemd/cs2mmt-sentinel.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now cs2mmt-sentinel
+[Unit]
+Description=CS2 Mod Management Tool sentinel (C, always-on update watcher)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=cs2mmt
+# After a tool update (git pull) a restart rebuilds; if the build fails the previous binary runs.
+ExecStartPre=-/usr/bin/make -s -C /opt/cs2mmt/sentinel rebuild
+ExecStart=/opt/cs2mmt/sentinel/cs2mmt-sentinel --config /etc/cs2mmt/sentinel.conf
+Restart=always
+RestartSec=10
+WatchdogSec=180
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/cs2mmt /opt/cs2mmt/sentinel
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

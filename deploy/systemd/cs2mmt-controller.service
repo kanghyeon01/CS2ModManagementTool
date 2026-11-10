@@ -1,0 +1,31 @@
+# Debian/Ubuntu without Docker:
+#   sudo useradd --system --home /var/lib/cs2mmt --create-home cs2mmt
+#   sudo git clone https://github.com/kanghyeon01/CS2ModManagementTool /opt/cs2mmt && sudo chown -R cs2mmt /opt/cs2mmt
+#   (owned by cs2mmt so Discord !update_tool can git pull; the service restarts itself after it)
+#   sudo install -d -o cs2mmt -m 750 /etc/cs2mmt   # controller.toml, secrets.toml (600), mods.toml
+#   sudo cp deploy/systemd/cs2mmt-controller.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now cs2mmt-controller
+[Unit]
+Description=CS2 Mod Management Tool controller
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=notify
+NotifyAccess=main
+User=cs2mmt
+WorkingDirectory=/opt/cs2mmt
+ExecStart=/usr/bin/python3 -m cs2mmt controller run --config /etc/cs2mmt/controller.toml
+Restart=always
+RestartSec=20
+# The controller sends WATCHDOG=1 every few seconds; if it hangs, systemd restarts it.
+WatchdogSec=600
+TimeoutStartSec=120
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/cs2mmt /opt/cs2mmt
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

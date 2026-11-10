@@ -1,0 +1,44 @@
+# cs2mmt-sentinel configuration (key = value). Copy to sentinel.conf and `chmod 600` it.
+id = nas-sentinel
+listen_host = 0.0.0.0
+listen_port = 8766
+# The same token as the controllers and the agent.
+api_token = CHANGE-ME-to-a-long-random-string
+state_file = /data/sentinel.state
+log_file =
+curl = curl
+
+appid = 949230
+branch = public
+build_url = https://api.steamcmd.net/v1/info/949230
+poll_seconds = 900
+settle_seconds = 1800
+
+wol_mac = AA:BB:CC:DD:EE:FF
+wol_broadcast = 192.168.0.255
+wol_port = 9
+wol_repeat = 3
+claim_timeout_seconds = 1500
+max_wake_attempts = 3
+lease_seconds = 1200
+max_job_attempts = 3
+retry_seconds = 1800
+approval = auto
+
+# Discord webhook of the same channel (channel settings → Integrations → Webhooks → Copy Webhook URL).
+# The sentinel only sends; commands and approvals go through the controller's bot.
+discord_webhook_url =
+# always | when_controller_down | never
+notify = when_controller_down
+# The Python controller on this machine; when it stops answering, the sentinel speaks up.
+controller_url = http://127.0.0.1:8765
+controller_down_seconds = 900
+
+# Optional heartbeat ("dead man's switch") of a monitoring service you choose: this URL is fetched
+# every healthcheck_seconds; when the pings stop, that service alerts you. Separate from the controller's.
+healthcheck_url =
+# Optional: fetched instead while Steam checks keep failing (leave empty to just stop pinging).
+healthcheck_fail_url =
+healthcheck_seconds = 300
+fail_alert_seconds = 21600
+unattended = 1

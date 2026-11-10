@@ -1,0 +1,24 @@
+# The Python controller. Multi-arch base image (amd64, arm64): Synology Plus (x86) and J (ARM64).
+#   docker build -f deploy/Dockerfile.controller -t cs2mmt-controller .
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata git \
+    && rm -rf /var/lib/apt/lists/* \
+    && git config --system --add safe.directory '*' \
+    && useradd --system --uid 10001 --home /data cs2mmt
+WORKDIR /app
+# The compose file mounts the repository checkout over /app, so !update_tool (git pull + restart)
+# updates the running code; the copy below is only a fallback when nothing is mounted.
+COPY cs2mmt /app/cs2mmt
+COPY prompts /app/prompts
+COPY config/mods.toml /app/config/mods.toml
+RUN python -m compileall -q /app/cs2mmt
+
+USER cs2mmt
+VOLUME ["/data", "/config"]
+EXPOSE 8765
+# Exits when the API stops answering, so the restart policy (or autoheal) can act.
+HEALTHCHECK --interval=60s --timeout=10s --start-period=60s --retries=5 \
+    CMD python -c "import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:8765/api/v1/health', timeout=8); sys.exit(0)" || exit 1
+ENTRYPOINT ["python", "-m", "cs2mmt", "controller", "run", "--config", "/config/controller.toml"]

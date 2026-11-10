@@ -1,0 +1,39 @@
+"AppState"
+{
+	"appid"		"949230"
+	"Universe"		"1"
+	"LauncherPath"		"C:\\Program Files (x86)\\Steam\\steam.exe"
+	"name"		"Cities: Skylines II"
+	"StateFlags"		"4"
+	"installdir"		"Cities Skylines II"
+	"LastUpdated"		"1761900000"
+	"SizeOnDisk"		"53687091200"
+	"StagingSize"		"0"
+	"buildid"		"20512345"
+	"LastOwner"		"76561190000000000"
+	"UpdateResult"		"0"
+	"BytesToDownload"		"0"
+	"BytesDownloaded"		"0"
+	"BytesToStage"		"0"
+	"BytesStaged"		"0"
+	"TargetBuildID"		"0"
+	"AutoUpdateBehavior"		"0"
+	"AllowOtherDownloadsWhileRunning"		"0"
+	"ScheduledAutoUpdate"		"0"
+	"InstalledDepots"
+	{
+		"949231"
+		{
+			"manifest"		"1234567890123456789"
+			"size"		"53687091200"
+		}
+	}
+	"UserConfig"
+	{
+		"language"		"english"
+	}
+	"MountedConfig"
+	{
+		"language"		"english"
+	}
+}

@@ -1,0 +1,57 @@
+# One file for both machines (Synology Container Manager "Project", or `docker compose` on
+# Debian/Ubuntu). Which machine is which comes from the mounted config files (id, role).
+#
+#   cd deploy && cp .env.example .env    # set REPO_DIR, CONFIG_DIR and DATA_DIR
+#   docker compose up -d --build         # once; later updates: Discord !update_tool (or deploy/update.sh)
+#
+# Host networking is needed for Wake-on-LAN broadcasts to reach the LAN.
+name: cs2mmt
+
+services:
+  controller:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.controller
+    image: cs2mmt-controller:local
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ${REPO_DIR:-..}:/app            # this repository: !update_tool pulls into it, then restarts
+      - ${CONFIG_DIR:-./config}:/config:ro
+      - ${DATA_DIR:-./data}/controller:/data
+    environment:
+      - TZ=Asia/Seoul
+    labels:
+      - autoheal=true
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  sentinel:
+    build:
+      context: ../sentinel
+    image: cs2mmt-sentinel:local
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ${REPO_DIR:-..}:/app:ro         # rebuilt from this source at every start
+      - ${CONFIG_DIR:-./config}:/config:ro
+      - ${DATA_DIR:-./data}/sentinel:/data
+    environment:
+      - TZ=Asia/Seoul
+    labels:
+      - autoheal=true
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "3" }
+
+  # Restarts a container whose health check keeps failing (Docker's restart policy alone only
+  # reacts to a process that exits). Optional but recommended for an unattended setup.
+  autoheal:
+    image: willfarrell/autoheal:1.2.0
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      - AUTOHEAL_INTERVAL=60
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

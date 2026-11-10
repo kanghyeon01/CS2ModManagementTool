@@ -90,6 +90,7 @@ def run_triage(
             prompt=prompt,
             cwd=Path(empty),
             schema=TRIAGE_SCHEMA,
+            tools="",  # no built-in tool at all: the posts cannot make the session read or do anything
             disallowed_tools=list(TRIAGE_DENY),
             max_turns=6,
             timeout_s=timeout_s,

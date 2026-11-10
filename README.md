@@ -60,7 +60,7 @@ Cities: Skylines II가 업데이트되어 모드가 깨지면, **사람 없이**
 ## 시험
 
 ```bash
-python -m pytest -q          # 94개: 단위 + 컨트롤러 HTTP + C 감시기 연동 + PC 파이프라인 전 과정 + 하네스 컴파일 + 업데이트
+python -m pytest -q          # 95개: 단위 + 컨트롤러 HTTP + C 감시기 연동 + PC 파이프라인 전 과정 + 하네스 컴파일 + 업데이트
 make -C sentinel test        # C 단위 테스트 (AddressSanitizer·UBSan)
 ```
 
